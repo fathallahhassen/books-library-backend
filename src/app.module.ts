@@ -1,6 +1,5 @@
-import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 
 import { BooksController } from './books/books.controller';
 import { AppController } from './app.controller';
@@ -25,16 +24,4 @@ import BookEntity from './books/entities/book.entity';
   controllers: [AppController, BooksController],
   providers: [AppService],
 })
-export class AppModule implements OnModuleInit {
-  private readonly logger = new Logger(AppModule.name);
-
-  constructor(private readonly dataSource: DataSource) {}
-
-  onModuleInit() {
-    if (this.dataSource.isInitialized) {
-      this.logger.log('Database connection successful! [AppModule]');
-    } else {
-      this.logger.error('Database connection failed.');
-    }
-  }
-}
+export class AppModule {}

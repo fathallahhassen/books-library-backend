@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import BookEntity from './entities/book.entity';
@@ -10,6 +10,7 @@ export class BooksService {
   constructor(
     @InjectRepository(BookEntity)
     private booksRepository: Repository<BookEntity>,
+    private dataSource: DataSource,
   ) {}
 
   findAll(): Promise<BookEntity[]> {
@@ -26,19 +27,34 @@ export class BooksService {
   }
 
   async update(id: number, updateBookDto: Partial<CreateBookDto>) {
-    // 1. Find the entity you want to update
     const bookFound = await this.booksRepository.findOneBy({ id });
     if (!bookFound) {
       throw new NotFoundException(`Entity with ID ${id} not found`);
     }
-
     Object.assign(bookFound, updateBookDto);
-
-    // 3. Save the modified entity
     return this.booksRepository.save(bookFound);
   }
 
   remove(id: number) {
     return this.booksRepository.delete(id);
+  }
+
+  async bulkInsert(books: BookEntity[]): Promise<void> {
+    await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(BookEntity)
+      .values(books)
+      .orIgnore()
+      .execute();
+  }
+
+  async bulkRemove(bookIds: number[]): Promise<void> {
+    await this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(BookEntity)
+      .whereInIds(bookIds)
+      .execute();
   }
 }
