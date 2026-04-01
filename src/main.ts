@@ -27,9 +27,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  await app.listen(configService.getOrThrow('app.port'));
+  await app.listen(`${configService.get('APP_PORT')}`);
 }
 
 void bootstrap().then(() => {
-  console.log(`Application started on port ${process.env.APP_PORT}`);
+  console.log(`Application started`);
 });
