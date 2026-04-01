@@ -1,24 +1,28 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { BooksController } from './books/books.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BooksModule } from './books/books.module';
-import BookEntity from './books/entities/book.entity';
+import dbConfig from './config/db-config';
+import appConfig from './config/app-config';
+import { validate } from './config/config.type';
 
 @Module({
   imports: [
     BooksModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgresHassfath91@',
-      database: 'books-library',
-      entities: [BookEntity],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [dbConfig, appConfig],
+      validate,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) =>
+        configService.getOrThrow('database'),
     }),
   ],
   controllers: [AppController, BooksController],

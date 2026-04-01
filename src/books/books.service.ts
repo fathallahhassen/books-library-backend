@@ -40,13 +40,30 @@ export class BooksService {
   }
 
   async bulkInsert(books: BookEntity[]): Promise<void> {
-    await this.dataSource
-      .createQueryBuilder()
-      .insert()
-      .into(BookEntity)
-      .values(books)
-      .orIgnore()
-      .execute();
+    // using transaction
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    // let's now open a new transaction:
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager
+        .createQueryBuilder()
+        .insert()
+        .into(BookEntity)
+        .values(books)
+        .orIgnore()
+        .execute();
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      // since we have errors, lets rollback changes we made
+      await queryRunner.rollbackTransaction();
+    } finally {
+      // you need to release query runner, which is manually created:
+      await queryRunner.release();
+    }
   }
 
   async bulkRemove(bookIds: number[]): Promise<void> {
