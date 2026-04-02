@@ -8,13 +8,22 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install the application dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the application files
 COPY . .
 
 # Build the NestJS application
 RUN npm run build
+
+# Create a non-root user and group
+RUN groupadd -r node && useradd -r -g node node
+
+# Change ownership of the application directory to the non-root user
+RUN chown -R node:node /usr/src/app
+
+# Switch to the non-root user
+USER node
 
 # Set NODE_ENV to production
 ENV NODE_ENV=production

@@ -8,7 +8,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 class BookEditor {
@@ -49,33 +49,33 @@ export class CreateBookDto {
   @IsNotEmpty()
   summaries: string[];
 
-  @ApiProperty({ type: [BookEditor] })
+  @ApiPropertyOptional({ type: [BookEditor] })
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => BookEditor)
   editors: BookEditor[];
 
-  @ApiProperty({ type: [BookEditor] })
+  @ApiPropertyOptional({ type: [BookEditor] })
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => BookEditor)
   translators: BookEditor[];
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
   subjects: string[];
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
   bookshelves: string[];
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
@@ -89,7 +89,7 @@ export class CreateBookDto {
   @IsString()
   media_type: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsObject()
   @IsOptional()
   formats: { [key: string]: string };

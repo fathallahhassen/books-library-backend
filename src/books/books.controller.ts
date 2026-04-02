@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -15,6 +14,7 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { ApiBody } from '@nestjs/swagger';
 import { BulkCreateItemsDto } from './dto/bulk-create-books.dto';
+import { BulkDeleteBooksDto } from './dto/bulk-delete-books.dto';
 
 @Controller('books')
 export class BooksController {
@@ -90,21 +90,13 @@ export class BooksController {
   }
 
   @Post('bulk-delete')
-  async bulkDelete(@Body() ids: number[]): Promise<{
+  @ApiBody({ type: BulkDeleteBooksDto })
+  async bulkDelete(@Body() idsDto: BulkDeleteBooksDto): Promise<{
     success: boolean;
     message: string;
     data: { deletedIds: number[]; notFoundOrIgnored: number[] };
   }> {
-    if (!Array.isArray(ids)) {
-      throw new BadRequestException('Body must be an array of numeric IDs');
-    }
-
-    const hasNonNumbers = ids.some((v) => Number.isNaN(v));
-    if (hasNonNumbers) {
-      throw new BadRequestException('All IDs must be numbers');
-    }
-
-    const result = await this.booksService.bulkRemove(ids);
+    const result = await this.booksService.bulkRemove(idsDto.ids);
     return {
       success: true,
       message: 'Bulk delete processed',
