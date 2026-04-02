@@ -183,19 +183,19 @@ export class BooksService {
       throw new BadRequestException('No IDs provided for bulk deletion');
     }
 
-    const existingBooks = await this.booksRepository.find({
-      where: { id: In(bookIds) },
-      select: ['id'],
-    });
-    const existingIds = existingBooks.map((b) => b.id);
-    const existingIdsSet = new Set(existingIds);
-    const notFoundOrIgnored = bookIds.filter((id) => !existingIdsSet.has(id));
-
-    if (existingIds.length === 0) {
-      throw new NotFoundException('None of the provided IDs were found');
-    }
-
     try {
+      const existingBooks = await this.booksRepository.find({
+        where: { id: In(bookIds) },
+        select: ['id'],
+      });
+      const existingIds = existingBooks.map((b) => b.id);
+      const existingIdsSet = new Set(existingIds);
+      const notFoundOrIgnored = bookIds.filter((id) => !existingIdsSet.has(id));
+
+      if (existingIds.length === 0) {
+        throw new NotFoundException('None of the provided IDs were found');
+      }
+
       await this.dataSource
         .createQueryBuilder()
         .delete()
