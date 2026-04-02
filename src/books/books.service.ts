@@ -152,6 +152,7 @@ export class BooksService {
 
         // identifiers contain the primary keys of the inserted rows
         result.identifiers.forEach((idObj) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           insertedIds.push(idObj.id);
         });
       }
