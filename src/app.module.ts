@@ -15,8 +15,7 @@ import { validate } from './config/config.type';
     BooksModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      //      `${configService.get('APP_PORT')}`
-      envFilePath: [`.env.${process.env.NODE_ENV}`],
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env', '.env.production'],
       load: [dbConfig, appConfig],
       validate,
     }),
