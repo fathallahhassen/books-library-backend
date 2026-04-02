@@ -1,11 +1,29 @@
-import { IsBoolean, IsInt, IsNotEmpty, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
-type BookEditor = {
+class BookEditor {
+  @ApiProperty()
+  @IsString()
   name: string;
+
+  @ApiProperty()
+  @IsInt()
   birth_year: number;
+
+  @ApiProperty()
+  @IsInt()
   death_year: number;
-};
+}
 
 export class CreateBookDto {
   @ApiProperty()
@@ -18,27 +36,49 @@ export class CreateBookDto {
   @IsNotEmpty()
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: [BookEditor] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BookEditor)
   @IsNotEmpty()
   authors: BookEditor[];
 
   @ApiProperty()
+  @IsArray()
+  @IsString({ each: true })
   @IsNotEmpty()
   summaries: string[];
 
-  @ApiProperty()
+  @ApiPropertyOptional({ type: [BookEditor] })
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => BookEditor)
   editors: BookEditor[];
 
-  @ApiProperty()
+  @ApiPropertyOptional({ type: [BookEditor] })
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => BookEditor)
   translators: BookEditor[];
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
   subjects: string[];
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
   bookshelves: string[];
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
   languages: string[];
 
   @ApiProperty()
@@ -49,7 +89,9 @@ export class CreateBookDto {
   @IsString()
   media_type: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsObject()
+  @IsOptional()
   formats: { [key: string]: string };
 
   @ApiProperty()
