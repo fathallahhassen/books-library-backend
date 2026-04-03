@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
 
 import { BooksController } from './books.controller';
 import { BooksService } from './books.service';
@@ -30,6 +29,7 @@ describe('BooksController', () => {
     create: jest.fn(),
     findAll: jest.fn(),
     findOne: jest.fn(),
+    search: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
     bulkInsert: jest.fn(),
@@ -111,9 +111,18 @@ describe('BooksController', () => {
     expect(serviceMock.update).toHaveBeenCalledWith(1, dto);
   });
 
-  it('remove passes numeric id', async () => {
-    serviceMock.remove.mockResolvedValue(undefined);
+  it('search delegates to service', async () => {
+    serviceMock.search.mockResolvedValue([baseBook]);
 
+    await expect(controller.search('Book')).resolves.toEqual({
+      success: true,
+      message: 'Book fetched successfully',
+      data: [baseBook],
+    });
+    expect(serviceMock.search).toHaveBeenCalledWith('Book');
+  });
+
+  it('remove passes numeric id', async () => {
     await expect(controller.remove(1)).resolves.toEqual({
       success: true,
       message: 'Book deleted successfully',
@@ -121,31 +130,16 @@ describe('BooksController', () => {
     expect(serviceMock.remove).toHaveBeenCalledWith(1);
   });
 
-  describe('bulkDelete', () => {
-    it('should successfully bulk delete', async () => {
-      const ids = [1, 2];
-      const result = { deletedIds: [1, 2], notFoundOrIgnored: [] };
-      serviceMock.bulkRemove.mockResolvedValue(result);
+  it('bulkDelete delegates to service', async () => {
+    const ids = [1, 2];
+    const result = { deletedIds: [1, 2], notFoundOrIgnored: [] };
+    serviceMock.bulkRemove.mockResolvedValue(result);
 
-      await expect(controller.bulkDelete(ids)).resolves.toEqual({
-        success: true,
-        message: 'Bulk delete processed',
-        data: result,
-      });
-      expect(serviceMock.bulkRemove).toHaveBeenCalledWith(ids);
+    await expect(controller.bulkDelete({ ids })).resolves.toEqual({
+      success: true,
+      message: 'Bulk delete processed',
+      data: result,
     });
-
-    it('should throw BadRequestException if body is not an array', async () => {
-      await expect(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        controller.bulkDelete('not-an-array' as any),
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it('should throw BadRequestException if array contains non-numbers', async () => {
-      await expect(controller.bulkDelete([1, NaN])).rejects.toThrow(
-        BadRequestException,
-      );
-    });
+    expect(serviceMock.bulkRemove).toHaveBeenCalledWith(ids);
   });
 });

@@ -32,22 +32,27 @@ describe('BooksService', () => {
     download_count: 1,
   };
 
+  const queryBuilderMock = {
+    delete: jest.fn().mockReturnThis(),
+    from: jest.fn().mockReturnThis(),
+    whereInIds: jest.fn().mockReturnThis(),
+    returning: jest.fn().mockReturnThis(),
+    execute: jest.fn(),
+    insert: jest.fn().mockReturnThis(),
+    into: jest.fn().mockReturnThis(),
+    values: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    orWhere: jest.fn().mockReturnThis(),
+    getMany: jest.fn(),
+  };
+
   const repoMock = {
     find: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     findOneBy: jest.fn(),
     delete: jest.fn(),
-  };
-
-  const queryBuilderMock = {
-    delete: jest.fn().mockReturnThis(),
-    from: jest.fn().mockReturnThis(),
-    whereInIds: jest.fn().mockReturnThis(),
-    execute: jest.fn(),
-    insert: jest.fn().mockReturnThis(),
-    into: jest.fn().mockReturnThis(),
-    values: jest.fn().mockReturnThis(),
+    createQueryBuilder: jest.fn().mockReturnValue(queryBuilderMock),
   };
 
   const queryRunnerMock = {
@@ -140,6 +145,44 @@ describe('BooksService', () => {
     it('should throw NotFoundException if not found', async () => {
       repo.findOneBy.mockResolvedValue(null);
       await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('search', () => {
+    it('should return books matching title', async () => {
+      queryBuilderMock.getMany.mockResolvedValue([baseBook]);
+
+      await expect(service.search('Book')).resolves.toEqual([baseBook]);
+      expect(queryBuilderMock.where).toHaveBeenCalledWith(
+        'book.title ILIKE :query',
+        { query: '%Book%' },
+      );
+    });
+
+    it('should return books matching author name', async () => {
+      const authorBook: BookEntity = {
+        ...baseBook,
+        authors: [{ name: 'Test Author', birth_year: 1900, death_year: 1980 }],
+      };
+      queryBuilderMock.getMany.mockResolvedValue([authorBook]);
+
+      await expect(service.search('Test Author')).resolves.toEqual([
+        authorBook,
+      ]);
+    });
+
+    it('should return empty array when no matches', async () => {
+      queryBuilderMock.getMany.mockResolvedValue([]);
+
+      await expect(service.search('nonexistent')).resolves.toEqual([]);
+    });
+
+    it('should throw InternalServerErrorException on database error', async () => {
+      queryBuilderMock.getMany.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.search('Book')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -237,7 +280,9 @@ describe('BooksService', () => {
       const ids = [1, 2];
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       repo.find.mockResolvedValue([{ id: 1 }, { id: 2 }] as any);
-      queryBuilderMock.execute.mockResolvedValue({ affected: 2 });
+      queryBuilderMock.execute.mockResolvedValue({
+        raw: [{ id: 1 }, { id: 2 }],
+      });
 
       const result = await service.bulkRemove(ids);
 
@@ -252,7 +297,7 @@ describe('BooksService', () => {
       const ids = [1, 2, 3];
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       repo.find.mockResolvedValue([{ id: 1 }] as any);
-      queryBuilderMock.execute.mockResolvedValue({ affected: 1 });
+      queryBuilderMock.execute.mockResolvedValue({ raw: [{ id: 1 }] });
 
       const result = await service.bulkRemove(ids);
 
