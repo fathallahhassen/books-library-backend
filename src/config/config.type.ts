@@ -27,12 +27,6 @@ class EnvironmentVariables {
   @IsOptional()
   PORT: number = 3000;
 
-  @IsInt()
-  @Min(0)
-  @Max(65535)
-  @IsOptional()
-  APP_PORT: number;
-
   @IsString()
   @IsOptional()
   APP_NAME: string = 'app';
@@ -42,25 +36,20 @@ class EnvironmentVariables {
   API_PREFIX: string = 'api';
 
   @IsString()
-  @IsOptional()
   DATABASE_HOST: string;
 
   @IsInt()
   @Min(0)
   @Max(65535)
-  @IsOptional()
   DATABASE_PORT: number = 5432;
 
   @IsString()
-  @IsOptional()
   DATABASE_USERNAME: string;
 
   @IsString()
-  @IsOptional()
   DATABASE_PASSWORD: string;
 
   @IsString()
-  @IsOptional()
   DATABASE_NAME: string;
 }
 

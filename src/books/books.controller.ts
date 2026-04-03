@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { BooksService } from './books.service';
@@ -53,6 +54,16 @@ export class BooksController {
     return {
       success: true,
       message: 'Books fetched successfully',
+      data,
+    };
+  }
+
+  @Get('search')
+  async search(@Query('q') query: string) {
+    const data = await this.booksService.search(query);
+    return {
+      success: true,
+      message: 'Book fetched successfully',
       data,
     };
   }

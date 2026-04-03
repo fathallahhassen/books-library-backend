@@ -16,9 +16,6 @@ COPY . .
 # Build the NestJS application
 RUN npm run build
 
-# Create a non-root user and group
-RUN groupadd -r node && useradd -r -g node node
-
 # Change ownership of the application directory to the non-root user
 RUN chown -R node:node /usr/src/app
 

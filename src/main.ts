@@ -27,7 +27,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  await app.listen(`${configService.get('APP_PORT')}`);
+  const port = configService.get<number>('PORT') ?? 3000;
+  await app.listen(port);
 }
 
 void bootstrap().then(() => {

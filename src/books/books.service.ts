@@ -67,17 +67,27 @@ export class BooksService {
     return book;
   }
 
-  private async findOneById(id: number): Promise<BookEntity | null> {
+  async search(query: string) {
     try {
-      return await this.booksRepository.findOneBy({ id });
+      return await this.booksRepository
+        .createQueryBuilder('book')
+        .where('book.title ILIKE :query', { query: `%${query}%` })
+        .orWhere(
+          `EXISTS (
+            SELECT 1 FROM jsonb_array_elements(book.authors) AS author
+            WHERE author->>'name' ILIKE :query
+          )`,
+          { query: `%${query}%` },
+        )
+        .getMany();
     } catch (error) {
       const err = error as Error;
       this.logger.error(
-        `Database error during search for book ${id}: ${err.message}`,
+        `Database error during search for book ${query}: ${err.message}`,
         err.stack,
       );
       throw new InternalServerErrorException({
-        message: 'Error searching for book in database',
+        message: 'Error searching for books in database',
         error: process.env.NODE_ENV === 'production' ? undefined : err.message,
       });
     }
@@ -183,29 +193,36 @@ export class BooksService {
       throw new BadRequestException('No IDs provided for bulk deletion');
     }
 
+    const existingBooks = await this.booksRepository.find({
+      where: { id: In(bookIds) },
+      select: ['id'],
+    });
+    const existingIds = existingBooks.map((b) => b.id);
+
+    if (existingIds.length === 0) {
+      throw new NotFoundException('None of the provided IDs were found');
+    }
+
     try {
-      const existingBooks = await this.booksRepository.find({
-        where: { id: In(bookIds) },
-        select: ['id'],
-      });
-      const existingIds = existingBooks.map((b) => b.id);
-      const existingIdsSet = new Set(existingIds);
-      const notFoundOrIgnored = bookIds.filter((id) => !existingIdsSet.has(id));
-
-      if (existingIds.length === 0) {
-        throw new NotFoundException('None of the provided IDs were found');
-      }
-
-      await this.dataSource
+      const deleteResult = await this.dataSource
         .createQueryBuilder()
         .delete()
         .from(BookEntity)
         .whereInIds(existingIds)
+        .returning('id') // Postgres returns actually deleted rows
         .execute();
 
+      const actuallyDeletedIds: number[] = (
+        deleteResult.raw as { id: number }[]
+      ).map((row) => row.id);
+      const actuallyDeletedSet = new Set(actuallyDeletedIds);
+      const actualNotFoundOrIgnored = bookIds.filter(
+        (id) => !actuallyDeletedSet.has(id),
+      );
+
       return {
-        deletedIds: existingIds,
-        notFoundOrIgnored: notFoundOrIgnored,
+        deletedIds: actuallyDeletedIds, // built from DB outcome
+        notFoundOrIgnored: actualNotFoundOrIgnored,
       };
     } catch (error) {
       if (
@@ -218,6 +235,22 @@ export class BooksService {
       this.logger.error(`Bulk deletion failed: ${err.message}`, err.stack);
       throw new InternalServerErrorException({
         message: 'Error during bulk deletion',
+        error: process.env.NODE_ENV === 'production' ? undefined : err.message,
+      });
+    }
+  }
+
+  private async findOneById(id: number): Promise<BookEntity | null> {
+    try {
+      return await this.booksRepository.findOneBy({ id });
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Database error during search for book ${id}: ${err.message}`,
+        err.stack,
+      );
+      throw new InternalServerErrorException({
+        message: 'Error searching for book in database',
         error: process.env.NODE_ENV === 'production' ? undefined : err.message,
       });
     }
