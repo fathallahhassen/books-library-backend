@@ -49,7 +49,8 @@ describe('BooksController (e2e)', () => {
     it('returns 400 when body is not an object with ids array', () => {
       return request(app.getHttpServer())
         .post('/books/bulk-delete')
-        .send('not-an-array')
+        .set('Content-Type', 'application/json')
+        .send({ ids: 'not-an-array' })
         .expect(400);
     });
 

@@ -114,7 +114,7 @@ describe('BooksController', () => {
   it('search delegates to service', async () => {
     serviceMock.search.mockResolvedValue([baseBook]);
 
-    await expect(controller.search('Book')).resolves.toEqual({
+    await expect(controller.search({ q: 'Book' })).resolves.toEqual({
       success: true,
       message: 'Book fetched successfully',
       data: [baseBook],

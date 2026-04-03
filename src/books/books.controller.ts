@@ -16,6 +16,7 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { ApiBody } from '@nestjs/swagger';
 import { BulkCreateItemsDto } from './dto/bulk-create-books.dto';
 import { BulkDeleteBooksDto } from './dto/bulk-delete-books.dto';
+import { SearchBooksQueryDto } from './dto/search-books-query.dto';
 
 @Controller('books')
 export class BooksController {
@@ -59,8 +60,8 @@ export class BooksController {
   }
 
   @Get('search')
-  async search(@Query('q') query: string) {
-    const data = await this.booksService.search(query);
+  async search(@Query() query: SearchBooksQueryDto) {
+    const data = await this.booksService.search(query.q);
     return {
       success: true,
       message: 'Book fetched successfully',
