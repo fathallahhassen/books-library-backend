@@ -5,6 +5,7 @@ import { BooksController } from './books.controller';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { BulkDeleteBooksDto } from './dto/bulk-delete-books.dto';
 import BookEntity from './entities/book.entity';
 
 describe('BooksController', () => {
@@ -127,7 +128,7 @@ describe('BooksController', () => {
       const result = { deletedIds: [1, 2], notFoundOrIgnored: [] };
       serviceMock.bulkRemove.mockResolvedValue(result);
 
-      await expect(controller.bulkDelete(ids)).resolves.toEqual({
+      await expect(controller.bulkDelete({ ids } as BulkDeleteBooksDto)).resolves.toEqual({
         success: true,
         message: 'Bulk delete processed',
         data: result,
@@ -143,9 +144,9 @@ describe('BooksController', () => {
     });
 
     it('should throw BadRequestException if array contains non-numbers', async () => {
-      await expect(controller.bulkDelete([1, NaN])).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        controller.bulkDelete({ ids: [1, NaN] } as BulkDeleteBooksDto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

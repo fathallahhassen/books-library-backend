@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -96,6 +97,9 @@ export class BooksController {
     message: string;
     data: { deletedIds: number[]; notFoundOrIgnored: number[] };
   }> {
+    if (!Array.isArray(idsDto?.ids) || idsDto.ids.some((id) => !Number.isFinite(id))) {
+      throw new BadRequestException('ids must be an array of finite integers');
+    }
     const result = await this.booksService.bulkRemove(idsDto.ids);
     return {
       success: true,
