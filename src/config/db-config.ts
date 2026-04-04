@@ -14,6 +14,7 @@ export default registerAs('database', (): DataSourceOptions => {
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME,
     entities: [BookEntity],
-    synchronize: process.env.NODE_ENV === 'development',
+    synchronize: false,
+    migrations: ['dist/migrations/*.js'],
   };
 });

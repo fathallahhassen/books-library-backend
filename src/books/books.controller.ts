@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Patch,
@@ -102,6 +103,7 @@ export class BooksController {
   }
 
   @Post('bulk-delete')
+  @HttpCode(200)
   @ApiBody({ type: BulkDeleteBooksDto })
   async bulkDelete(@Body() idsDto: BulkDeleteBooksDto): Promise<{
     success: boolean;

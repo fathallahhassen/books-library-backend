@@ -31,6 +31,7 @@ $ npm run test:cov
 ```
 
 ## Support
+
 ### Run Commands
 
 1. **Start Docker Infrastructure (Production & Monitoring):**
@@ -44,9 +45,10 @@ $ npm run test:cov
 ### Service Access & URLs
 
 - **Local Dev API (swagger):** http://localhost:3000/api
-- **Docker Prod API (swagger):** http://localhost:3005/api
-- **Grafana (Monitoring):** http://localhost:3001 (User: `admin` / Pass: `admin`)
-- **Prometheus (Status):** http://localhost:9090/targets
+- **Docker Prod API (swagger):** http://localhost:3006/api
+- **Grafana (Monitoring):** http://localhost:3007 (User: `admin` / Pass: `admin`)
+- **Prometheus (Status):** http://localhost:9091/targets
 - **Postgres (Local):** localhost:5432
 
-*Note: Port 5432 is reserved for your local database. Docker services now run their own internal database to avoid conflicts.*
+*Note: Port 5432 is reserved for your local database. Docker services now run their own internal database to avoid
+conflicts.*
