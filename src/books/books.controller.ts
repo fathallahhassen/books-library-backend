@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Patch,
@@ -64,7 +65,7 @@ export class BooksController {
     const data = await this.booksService.search(query.q);
     return {
       success: true,
-      message: 'Book fetched successfully',
+      message: 'Books fetched successfully',
       data,
     };
   }
@@ -102,6 +103,7 @@ export class BooksController {
   }
 
   @Post('bulk-delete')
+  @HttpCode(200)
   @ApiBody({ type: BulkDeleteBooksDto })
   async bulkDelete(@Body() idsDto: BulkDeleteBooksDto): Promise<{
     success: boolean;
