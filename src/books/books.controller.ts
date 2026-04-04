@@ -3,41 +3,118 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { ApiBody } from '@nestjs/swagger';
+import { BulkCreateItemsDto } from './dto/bulk-create-books.dto';
+import { BulkDeleteBooksDto } from './dto/bulk-delete-books.dto';
+import { SearchBooksQueryDto } from './dto/search-books-query.dto';
 
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
-  create(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.create(createBookDto);
+  @ApiBody({
+    type: CreateBookDto,
+  })
+  async create(@Body() createBookDto: CreateBookDto) {
+    const data = await this.booksService.create(createBookDto);
+    return {
+      success: true,
+      message: 'Book created successfully',
+      data,
+    };
+  }
+
+  @Post('bulk-create')
+  @ApiBody({
+    type: BulkCreateItemsDto,
+    description: 'The data required to create multiple books',
+  })
+  async bulkCreate(@Body() bulkCreateItemsDto: BulkCreateItemsDto) {
+    const result = await this.booksService.bulkInsert(bulkCreateItemsDto.items);
+    return {
+      success: true,
+      message: 'Bulk create processed',
+      data: result,
+    };
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  async findAll() {
+    const data = await this.booksService.findAll();
+    return {
+      success: true,
+      message: 'Books fetched successfully',
+      data,
+    };
+  }
+
+  @Get('search')
+  async search(@Query() query: SearchBooksQueryDto) {
+    const data = await this.booksService.search(query.q);
+    return {
+      success: true,
+      message: 'Book fetched successfully',
+      data,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.booksService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const data = await this.booksService.findOne(id);
+    return {
+      success: true,
+      message: 'Book fetched successfully',
+      data,
+    };
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.booksService.update(+id, updateBookDto);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBookDto: UpdateBookDto,
+  ) {
+    const data = await this.booksService.update(id, updateBookDto);
+    return {
+      success: true,
+      message: 'Book updated successfully',
+      data,
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.booksService.remove(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.booksService.remove(id);
+    return {
+      success: true,
+      message: 'Book deleted successfully',
+    };
+  }
+
+  @Post('bulk-delete')
+  @HttpCode(200)
+  @ApiBody({ type: BulkDeleteBooksDto })
+  async bulkDelete(@Body() idsDto: BulkDeleteBooksDto): Promise<{
+    success: boolean;
+    message: string;
+    data: { deletedIds: number[]; notFoundOrIgnored: number[] };
+  }> {
+    const result = await this.booksService.bulkRemove(idsDto.ids);
+    return {
+      success: true,
+      message: 'Bulk delete processed',
+      data: result,
+    };
   }
 }
