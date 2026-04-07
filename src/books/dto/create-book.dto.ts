@@ -43,7 +43,7 @@ export class CreateBookDto {
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => BookEditor)
-  authors: BookEditor[];
+  authors?: BookEditor[];
 
   @ApiProperty()
   @IsArray()
@@ -56,14 +56,14 @@ export class CreateBookDto {
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => BookEditor)
-  editors: BookEditor[];
+  editors?: BookEditor[];
 
   @ApiPropertyOptional({ type: [BookEditor] })
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => BookEditor)
-  translators: BookEditor[];
+  translators?: BookEditor[];
 
   @ApiPropertyOptional()
   @IsArray()
