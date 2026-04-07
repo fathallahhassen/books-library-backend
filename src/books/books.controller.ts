@@ -65,7 +65,7 @@ export class BooksController {
     const data = await this.booksService.search(query.q);
     return {
       success: true,
-      message: 'Book fetched successfully',
+      message: 'Books fetched successfully',
       data,
     };
   }

@@ -2,8 +2,8 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 type BookEditor = {
   name: string;
-  birth_year: number;
-  death_year: number;
+  birth_year?: number;
+  death_year?: number;
 };
 
 @Entity()

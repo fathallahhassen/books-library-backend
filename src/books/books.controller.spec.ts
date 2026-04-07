@@ -5,6 +5,7 @@ import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import BookEntity from './entities/book.entity';
+import { BulkCreateItemsDto } from './dto/bulk-create-books.dto';
 
 describe('BooksController', () => {
   let controller: BooksController;
@@ -52,7 +53,7 @@ describe('BooksController', () => {
   });
 
   it('create delegates to service', async () => {
-    const dto: CreateBookDto = { ...baseBook };
+    const dto: CreateBookDto = <CreateBookDto>{ ...baseBook };
     serviceMock.create.mockResolvedValue(baseBook);
 
     await expect(controller.create(dto)).resolves.toEqual({
@@ -68,7 +69,9 @@ describe('BooksController', () => {
     const result = { insertedIds: [1], ignoredIds: [] };
     serviceMock.bulkInsert.mockResolvedValue(result);
 
-    await expect(controller.bulkCreate(dto)).resolves.toEqual({
+    await expect(
+      controller.bulkCreate(<BulkCreateItemsDto>dto),
+    ).resolves.toEqual({
       success: true,
       message: 'Bulk create processed',
       data: result,
@@ -116,7 +119,7 @@ describe('BooksController', () => {
 
     await expect(controller.search({ q: 'Book' })).resolves.toEqual({
       success: true,
-      message: 'Book fetched successfully',
+      message: 'Books fetched successfully',
       data: [baseBook],
     });
     expect(serviceMock.search).toHaveBeenCalledWith('Book');

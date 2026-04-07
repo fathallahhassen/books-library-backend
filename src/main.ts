@@ -28,6 +28,13 @@ async function bootstrap() {
     }),
   );
   const port = configService.get<number>('PORT') ?? 3000;
+  app.enableCors({
+    origin:
+      configService.get<string>('NODE_ENV') === 'production'
+        ? configService.get<string>('CORS_ORIGIN') // e.g., 'https://your-frontend.com'
+        : true,
+    credentials: true,
+  });
   await app.listen(port, '0.0.0.0');
 }
 

@@ -1,7 +1,7 @@
 type BookEditor = {
   name: string;
-  birth_year: number;
-  death_year: number;
+  birth_year?: number;
+  death_year?: number;
 };
 
 export interface BookInterface {
